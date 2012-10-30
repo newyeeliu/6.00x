@@ -21,25 +21,25 @@ def compChooseWord(hand, wordList):
     wordList: list (string)
     returns: string or None
     """
-    # BEGIN PSEUDOCODE <-- Remove this comment when you code this function; do your coding within the pseudocode (leaving those comments in-place!)
     # Create a new variable to store the maximum score seen so far (initially 0)
-
+    maxScore = 0
     # Create a new variable to store the best word seen so far (initially None)  
-
+    bestWord = None
     # For each word in the wordList
-
+    for word in wordList:
         # If you can construct the word from your hand
         # (hint: you can use isValidWord, or - since you don't really need to test if the word is in the wordList - you can make a similar function that omits that test)
-
+        if isValidWord(word, hand, wordList):
             # Find out how much making that word is worth
-
+            score = getWordScore(word, HAND_SIZE)
             # If the score for that word is higher than your best score
-
+            if score > maxScore:
                 # Update your best score, and best word accordingly
-
+                maxScore = score
+                bestWord = word
 
     # return the best word you found.
-
+    return bestWord
 
 #
 # Problem #7: Computer plays a hand
@@ -62,7 +62,34 @@ def compPlayHand(hand, wordList):
     hand: dictionary (string -> int)
     wordList: list (string)
     """
-    # TO DO ... <-- Remove this comment when you code this function
+    # Keep track of two numbers: the number of letters left in your hand and the total score
+    remainingLetters = calculateHandlen(hand)
+    totalScore = 0
+
+    # As long as there are still letters left in the hand:
+    while remainingLetters > 0:
+        # Display the hand
+        print 'Current hand:', 
+        displayHand(hand)
+        # Ask user for input
+        selectedWord = compChooseWord(hand, wordList)
+        if selectedWord == None:
+            break
+
+        # Tell the user how many points the word earned, and the updated total score, in one line followed by a blank line
+        score = getWordScore(selectedWord, HAND_SIZE)
+        totalScore += score
+        print selectedWord, 'earned', str(score), 'points. Total:', totalScore, 'points'
+        # Update the hand
+        hand = updateHand(hand, selectedWord)
+        remainingLetters = calculateHandlen(hand)
+                
+
+    # Game is over (user entered a '.' or ran out of letters), so tell user the total score
+    if remainingLetters == 0:
+        print 'Run out of letters. Total score:', totalScore, 'points.'
+    else:
+        print 'Goodbye! Total score:', totalScore, 'points.'
     
 #
 # Problem #8: Playing a game
@@ -92,8 +119,33 @@ def playGame(wordList):
 
     wordList: list (string)
     """
-    # TO DO... <-- Remove this comment when you code this function
-    print "playGame not yet implemented." # <-- Remove this when you code this function
+    selection = raw_input('Enter n to deal a new hand, r to replay the last hand, or e to end game: ')
+
+    hand = {}
+    while selection != 'e':
+        comp = raw_input('Enter u to play yourself or c to let the computer play: ')
+        while comp != 'c' and comp != 'u':
+            print 'Invalid command.'
+            comp = raw_input('Enter u to play yourself or c to let the computer play: ')
+
+        if selection == 'n':
+            hand = dealHand(HAND_SIZE)
+
+            if comp == 'c':
+                compPlayHand(hand.copy(), wordList)
+            elif comp == 'u':
+                playHand(hand.copy(), wordList, HAND_SIZE)
+        elif selection == 'r':
+            if len(hand) == 0:
+                print 'You have not played a hand yet. Please play a new hand first!'
+            else:
+                if comp == 'c':
+                    compPlayHand(hand.copy(), wordList)
+                elif comp == 'u':
+                    playHand(hand.copy(), wordList, HAND_SIZE)
+        else:
+            print 'Invalid command.'
+        selection = raw_input('Enter n to deal a new hand, r to replay the last hand, or e to end game: ')
 
         
 #
