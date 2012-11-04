@@ -94,12 +94,21 @@ def buildCoder(shift):
     """
     Returns a dict that can apply a Caesar cipher to a letter.
     The cipher is defined by the shift value. Ignores non-letter characters
-    like punctuation, numbers and spaces.
+    like punctuation, numbers, and spaces.
 
     shift: 0 <= int < 26
     returns: dict
     """
-    ### TODO.
+    result = dict()
+    
+    lowercase = string.ascii_lowercase    
+    index = 0
+    for letter in lowercase:
+        shiftedIndex = (index + shift) % len(lowercase)
+        result[letter] = lowercase[shiftedIndex:shiftedIndex+1]
+        result[letter.upper()] = result[letter].upper()
+        index += 1
+    return result
     
 
 def applyCoder(text, coder):
@@ -110,7 +119,13 @@ def applyCoder(text, coder):
     coder: dict with mappings of characters to shifted characters
     returns: text after mapping coder chars to original text
     """
-    ### TODO.
+    result = ""
+    for letter in text:
+        if letter in coder:
+            result += coder[letter]
+        else:
+            result += letter
+    return result
     
 
 def applyShift(text, shift):
@@ -124,8 +139,8 @@ def applyShift(text, shift):
     shift: amount to shift the text (0 <= int < 26)
     returns: text after being shifted by specified amount.
     """
-    ### TODO.
-    ### HINT: This is a wrapper function.
+    return applyCoder(text, buildCoder(shift))
+
     
 
 #
@@ -138,20 +153,34 @@ def findBestShift(wordList, text):
     text: string
     returns: 0 <= int < 26
     """
-    ### TODO
+    bestShift = 0
+    bestCount = 0
+    for i in range(26):
+        decrypted = applyShift(text, i)
+        count = 0
+        for word in decrypted.split(" "):
+            if isWord(wordList, word):
+                count += 1
+        if count > bestCount:
+            bestCount = count
+            bestShift = i
+    return bestShift
 
 
 def decryptStory():
     """
     Using the methods you created in this problem set,
     decrypt the story given by the function getStoryString().
-    Use the functions getStoryString and loadWords to get the
-    raw data you need.
+    Once you decrypt the message, be sure to include as a comment
+    your decryption of the story.
 
     returns: string - story in plain text
     """
-    ### TODO.
-    return "Not yet implemented." # Remove this comment when you code the function
+    wordList = loadWords()
+    story = getStoryString()
+    shift = findBestShift(wordList, story)
+    print applyShift(story, shift)
+    return applyShift(story, shift)
 
 #
 # Build data structures used for entire session and run encryption
